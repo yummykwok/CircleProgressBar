@@ -36,6 +36,7 @@ public class CircleProgressBar extends ProgressBar {
     private int mProgress = 0;
     private boolean stopAnimation = false;
     private boolean animStated = false;
+
     private Runnable mRefreshThread = new Runnable(){
 
         @Override
@@ -46,30 +47,34 @@ public class CircleProgressBar extends ProgressBar {
             	startAngle = 0;
             }
 
-            if(mOldProgress<=mProgress || mOldProgress<MIN_ANGLE) {
-            	mOldProgress++;
+            if (mOldProgress<=mProgress) {
                 float percent = ((float) mOldProgress) / ((float)getMax());
                 int i = (int) (percent * 100);
-                i = i>100 ? 100:i;
-                mAngle = 360.0f * percent;
-                if (i ==100) {
-                	txtProgress = "Done";                	
+
+                if (i >= 100) {
+                	txtProgress = "Done";
                 } else {
                 	txtProgress = String.valueOf(i) + "%";
                 }
+
+                if (mOldProgress<MIN_ANGLE) {
+                	mAngle = MIN_ANGLE;
+                } else {
+                    mAngle = 360.0f * percent;
+                }
+
+            	mOldProgress++;
             }
 
             if (!stopAnimation) {
                 mHandler.postDelayed(mRefreshThread, 10);
             }
 
-            if (getVisibility()==View.VISIBLE && mOldProgress<=getMax()) {
+            if (getVisibility()==View.VISIBLE && mOldProgress-1<=getMax()) {
                 invalidate();
             }
         }
-
     };
-
 
     private void startAnimation(){
     	if (!animStated) {
@@ -128,8 +133,6 @@ public class CircleProgressBar extends ProgressBar {
 
     @Override  
     protected synchronized void onDraw(Canvas canvas) {
-        //super.onDraw(canvas);
-        //canvas.drawCircle(centerX, centerY, mRadius, mPaintBackColor);
         this.mPaintText.getTextBounds(this.txtProgress, 0, this.txtProgress.length(), txtRect);
         canvas.drawText(this.txtProgress, centerX, centerY + txtRect.height()/2, this.mPaintText);
         canvas.drawArc(mRectF, startAngle, mAngle, false, mPaintProgress);
