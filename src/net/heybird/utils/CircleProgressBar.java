@@ -8,7 +8,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -29,7 +28,6 @@ public class CircleProgressBar extends ProgressBar {
     private int centerX, centerY;
 
     private RectF mRectF;
-    private Handler mHandler = new Handler();
     private float startAngle = 0;
     private float mAngle = MIN_ANGLE;
     private int mOldProgress = 0;
@@ -44,7 +42,7 @@ public class CircleProgressBar extends ProgressBar {
             startAngle += 1.5;
 
             if (startAngle>=360) {
-            	startAngle = 0;
+                startAngle = 0;
             }
 
             if (mOldProgress<=mProgress) {
@@ -52,22 +50,22 @@ public class CircleProgressBar extends ProgressBar {
                 int i = (int) (percent * 100);
 
                 if (i >= 100) {
-                	txtProgress = "Done";
+                    txtProgress = "Done";
                 } else {
-                	txtProgress = String.valueOf(i) + "%";
+                    txtProgress = String.valueOf(i) + "%";
                 }
 
                 if (mOldProgress<MIN_ANGLE) {
-                	mAngle = MIN_ANGLE;
+                    mAngle = MIN_ANGLE;
                 } else {
                     mAngle = 360.0f * percent;
                 }
 
-            	mOldProgress++;
+                mOldProgress++;
             }
 
             if (!stopAnimation) {
-                mHandler.postDelayed(mRefreshThread, 10);
+                postDelayed(mRefreshThread, 10);
             }
 
             if (getVisibility()==View.VISIBLE && mOldProgress-1<=getMax()) {
@@ -77,17 +75,17 @@ public class CircleProgressBar extends ProgressBar {
     };
 
     private void startAnimation(){
-    	if (!animStated) {
-    		stopAnimation = false;
-        	mHandler.post(mRefreshThread);
-        	animStated = true;
-    	}
+        if (!animStated) {
+            stopAnimation = false;
+            post(mRefreshThread);
+            animStated = true;
+        }
     }
 
     private void stopAnimation(){
-    	mHandler.removeCallbacks(mRefreshThread);
-    	stopAnimation = true;
-    	animStated = false;
+        removeCallbacks(mRefreshThread);
+        stopAnimation = true;
+        animStated = false;
     }
 
     private void init(){
@@ -125,9 +123,12 @@ public class CircleProgressBar extends ProgressBar {
     @Override  
     public synchronized void setProgress(int progress) {
         if (progress>getMax()) {
-        	progress = getMax();
+            progress = getMax();
         }
         mProgress = progress;
+        if (mProgress < mOldProgress) {
+            mOldProgress = mProgress;
+        }
         super.setProgress(progress);
     }
 
@@ -158,7 +159,7 @@ public class CircleProgressBar extends ProgressBar {
 
     @Override
     protected void onDetachedFromWindow() {
-    	super.onDetachedFromWindow();
-    	stopAnimation();
+        super.onDetachedFromWindow();
+        stopAnimation();
     }
 }
